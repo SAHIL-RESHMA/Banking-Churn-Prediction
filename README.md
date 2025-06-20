@@ -17,7 +17,6 @@ This project implements a deep learning model to predict whether a customer will
 ## 📂 Dataset Overview
 
 - **Dataset**: `Churn_Modelling.csv`
-- **Source**: [Kaggle – Customer Churn Prediction Dataset](https://www.kaggle.com/datasets/shubhendra7/customer-churn-prediction)
 
 ### ✨ Key Columns:
 - `CreditScore`, `Age`, `Tenure`, `Balance`, `NumOfProducts`, `EstimatedSalary` – Numerical
