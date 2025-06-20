@@ -27,31 +27,31 @@ DATA_PATH = "data/Churn_Modelling.csv"
 df = pd.read_csv(DATA_PATH)
 
 # ==============================================================================
-# 🎯 Feature Selection
+# 🎯 Feature and Target Selection
 # ==============================================================================
-# Extract independent features (columns 3 to 12) and target (Exited)
+# Independent features: columns 3 to 12
 X = df.iloc[:, 3:13].values
+
+# Dependent target variable: Exited column
 y = df.iloc[:, 13].values
 
 # ==============================================================================
-# 🔄 Encode Categorical Features
+# 🔄 Encode Categorical Variables
 # ==============================================================================
-
-# Encode Gender (binary)
+# Label encode Gender (Male/Female → 1/0)
 gender_encoder = LabelEncoder()
-X[:, 2] = gender_encoder.fit_transform(X[:, 2])  # Male → 1, Female → 0
+X[:, 2] = gender_encoder.fit_transform(X[:, 2])
 
-# Encode Geography (multi-class) with OneHotEncoder
-geo_transformer = ColumnTransformer(
-    transformers=[("geo_encoder", OneHotEncoder(), [1])],
-    remainder="passthrough"
+# One-hot encode Geography (France, Spain, Germany)
+geo_encoder = ColumnTransformer(
+    transformers=[('geo', OneHotEncoder(), [1])],
+    remainder='passthrough'
 )
-
-X = geo_transformer.fit_transform(X)
-X = X[:, 1:].astype(float)  # Drop one dummy column to avoid multicollinearity
+X = geo_encoder.fit_transform(X)
+X = X[:, 1:].astype(float)  # Avoid dummy variable trap
 
 # ==============================================================================
-# ✂️ Split the Dataset
+# ✂️ Train-Test Split
 # ==============================================================================
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
@@ -65,20 +65,14 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # ==============================================================================
-# 🧠 Build the ANN Model
+# 🧠 Build ANN Model
 # ==============================================================================
 model = Sequential()
-
-# Input Layer + First Hidden Layer
 model.add(Dense(units=6, activation='relu', kernel_initializer='uniform', input_dim=X_train.shape[1]))
-
-# Second Hidden Layer
 model.add(Dense(units=6, activation='relu', kernel_initializer='uniform'))
-
-# Output Layer
 model.add(Dense(units=1, activation='sigmoid', kernel_initializer='uniform'))
 
-# Compile the ANN
+# Compile model
 model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
 # ==============================================================================
@@ -87,14 +81,12 @@ model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']
 history = model.fit(X_train, y_train, batch_size=10, epochs=100, verbose=1)
 
 # ==============================================================================
-# 📈 Make Predictions
+# 📈 Predictions and Evaluation
 # ==============================================================================
 y_pred = model.predict(X_test)
 y_pred = (y_pred > 0.5).astype(int)
 
-# ==============================================================================
-# ✅ Evaluate the Model
-# ==============================================================================
+# Metrics
 cm = confusion_matrix(y_test, y_pred)
 acc = accuracy_score(y_test, y_pred)
 
